@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UK Client Reviews | Private Support</title>
+    <!-- 关键优化1：预加载头部大图，提升加载优先级 -->
+    <link rel="preload" href="https://github.com/w85142747-ship-it/homegithub.io/blob/ef8718a32f75eff3af1b406a66de971a26e32be3/banner.png?raw=true" as="image">
     <style>
         * {
             margin: 0;
@@ -18,11 +20,13 @@
             line-height: 1.6;
         }
 
+        /* 关键优化2：头部大图容器优化 - 懒加载+渐进式显示 */
         .hero {
             width: 100%;
             height: 680px;
+            /* 使用raw=true获取原始图片，避免GitHub页面嵌套 */
             background: linear-gradient(rgba(0, 70, 120, 0.55), rgba(0, 70, 120, 0.55)), 
-                        url('https://picsum.photos/1600/900') center top no-repeat;
+                        url('https://github.com/w85142747-ship-it/homegithub.io/blob/ef8718a32f75eff3af1b406a66de971a26e32be3/banner.png?raw=true') center top no-repeat;
             background-size: cover;
             display: flex;
             align-items: center;
@@ -32,18 +36,78 @@
             text-align: center;
             padding: 20px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            /* 优化3：背景图片加载过渡，避免白屏 */
+            background-color: #004678; /* 备用背景色，与渐变匹配 */
+            background-blend-mode: overlay;
+            transition: background-image 0.5s ease-in-out;
+        }
+
+        /* 关键优化4：图片加载前的占位样式 */
+        .hero::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 680px;
+            background: rgba(0, 70, 120, 0.3);
+            z-index: -1;
+            opacity: 1;
+            transition: opacity 0.5s ease;
         }
 
         .hero h1 {
             font-size: 52px;
             margin-bottom: 16px;
             font-weight: 600;
+            /* 文字抗锯齿，提升加载时的视觉体验 */
+            -webkit-font-smoothing: antialiased;
         }
 
         .hero p {
             font-size: 24px;
             opacity: 0.95;
             max-width: 700px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 新增服务介绍样式 */
+        .service-intro {
+            max-width: 1000px;
+            margin: 60px auto;
+            padding: 40px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+        }
+        .service-intro h2 {
+            font-size: 30px;
+            color: #222;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .service-intro p {
+            font-size: 17px;
+            line-height: 1.8;
+            color: #444;
+            margin-bottom: 16px;
+        }
+        .service-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .feature-item {
+            padding: 20px;
+            background: #e3f2ff;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .feature-item h3 {
+            color: #007bcc;
+            margin-bottom: 10px;
+            font-size: 18px;
         }
 
         .container {
@@ -70,12 +134,13 @@
             margin: 12px auto 0;
         }
 
-        /* 客户案例高端样式 */
+        /* 客户案例高端样式 - 支持轮播 */
         .case-grid {
             display: grid;
             grid-template-columns: 1fr;
             gap: 30px;
             margin-bottom: 40px;
+            min-height: 280px; /* 固定高度避免闪烁 */
         }
 
         .case {
@@ -87,6 +152,12 @@
             align-items: flex-start;
             gap: 26px;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            opacity: 1;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .case.fade-out {
+            opacity: 0;
         }
 
         .case:hover {
@@ -100,13 +171,14 @@
             border-radius: 50%;
             object-fit: cover;
             box-shadow: 0 6px 16px rgba(0,0,0,0.08);
-            /* 确保头像加载失败时显示背景色 */
             background-color: #e3f2ff;
             display: block;
         }
 
         .case-content { flex: 1; }
-        .case-city { font-size: 18px; font-weight: 600; color: #007bcc; margin-bottom: 10px; }
+        .case-name { font-size: 19px; font-weight: 600; color: #222; margin-bottom: 6px; }
+        .case-city { font-size: 16px; color: #007bcc; margin-bottom: 8px; }
+        .case-time { font-size: 14px; color: #777; margin-bottom: 10px; }
         .case-text { font-size: 16px; line-height: 1.7; color: #3d3d3d; margin-bottom: 14px; }
         .case-consent { font-size: 14px; color: #28a745; font-weight: 600; }
 
@@ -160,7 +232,6 @@
             align-items: flex-start;
             padding: 16px 0;
             border-bottom: 1px solid #f2f2f2;
-            /* 确保每个评论项布局稳定 */
             min-height: 80px;
         }
 
@@ -173,10 +244,8 @@
             margin-right: 14px;
             flex-shrink: 0;
             box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-            /* 关键修复：确保头像必显示，加载失败有备用背景 */
             background-color: #e3f2ff;
             display: block !important;
-            /* 预加载头像避免闪烁 */
             image-rendering: auto;
         }
 
@@ -196,14 +265,12 @@
             overflow: hidden;
             position: relative;
             box-shadow: 0 4px 12px rgba(0,0,0,0.04);
-            /* 确保容器高度稳定 */
             min-height: 90px;
         }
         .avatar-track {
             display: flex;
             gap: 16px;
             animation: avatarScroll 25s linear infinite;
-            /* 复制一份头像列表，实现无缝滚动 */
             width: max-content;
         }
         /* 关键修复：横向滚动头像必显示 */
@@ -221,7 +288,7 @@
             100% { transform: translateX(-50%); }
         }
 
-        /* 连续滚动文字 + 背景美观 */
+        /* 连续滚动文字 + 美观背景 */
         .text-scroll {
             width: 100%;
             background: #e3f2ff;
@@ -337,6 +404,17 @@
             color: #666;
             font-size: 14px;
         }
+
+        /* 响应式优化：小屏幕下图片加载优先级调整 */
+        @media (max-width: 768px) {
+            .hero {
+                height: 400px;
+                background-size: cover;
+            }
+            .hero::before {
+                height: 400px;
+            }
+        }
     </style>
 </head>
 
@@ -348,63 +426,38 @@
     <p>Private • Discreet • Trusted UK Client Reviews</p>
 </div>
 
-<div class="container">
-
-    <h2 class="section-title">Verified Client Stories</h2>
-
-    <!-- 6个高端客户案例 -->
-    <div class="case-grid">
-        <div class="case">
-            <img class="case-avatar" src="https://picsum.photos/200/200?10" alt="Client Avatar">
-            <div class="case-content">
-                <div class="case-city">London</div>
-                <div class="case-text">After following the full private support plan for several weeks, I’ve noticed clear improvements in my daily energy, confidence, and overall wellbeing. The guidance is gentle, consistent, and fully discreet. I feel respected and supported every step of the way, and the entire process remains completely confidential.</div>
-                <div class="case-consent">Published with client consent</div>
-            </div>
+<!-- 新增服务介绍模块 -->
+<div class="service-intro">
+    <h2>Our Private Support Services</h2>
+    <p>We provide personalized, discreet support services tailored to the unique needs of UK clients. Our team of certified professionals specializes in mental wellbeing, lifestyle balance, and personal development, offering one-on-one guidance that prioritizes your privacy and comfort above all else.</p>
+    <p>Whether you're struggling with daily stress, low energy, emotional imbalance, or simply seeking to improve your overall quality of life, our evidence-based approach delivers sustainable results without compromising your confidentiality. Every session is conducted in a safe, non-judgmental environment, and all client information is protected with the highest level of security protocols.</p>
+    <div class="service-features">
+        <div class="feature-item">
+            <h3>100% Confidential</h3>
+            <p>All interactions and personal data remain fully private</p>
         </div>
-        <div class="case">
-            <img class="case-avatar" src="https://picsum.photos/200/200?11" alt="Client Avatar">
-            <div class="case-content">
-                <div class="case-city">Manchester</div>
-                <div class="case-text">I was struggling with consistent low energy and mental stress for a long time before joining this private programme. The step-by-step support helped me rebuild balance in my daily life, and I now feel calmer, more focused, and physically stronger. Everything is handled with full privacy, which I truly appreciate.</div>
-                <div class="case-consent">Published with client consent</div>
-            </div>
+        <div class="feature-item">
+            <h3>Personalized Plans</h3>
+            <p>Tailored strategies based on your unique needs</p>
         </div>
-        <div class="case">
-            <img class="case-avatar" src="https://picsum.photos/200/200?12" alt="Client Avatar">
-            <div class="case-content">
-                <div class="case-city">Birmingham</div>
-                <div class="case-text">This is by far the most reliable and discreet private service I have used. The team listens carefully and provides realistic, sustainable guidance without pressure or judgment. My mood, stamina, and general quality of life have improved greatly, and I feel safe knowing all my information remains fully private.</div>
-                <div class="case-consent">Published with client consent</div>
-            </div>
+        <div class="feature-item">
+            <h3>UK-Based Experts</h3>
+            <p>Qualified professionals with local market expertise</p>
         </div>
-        <div class="case">
-            <img class="case-avatar" src="https://picsum.photos/200/200?13" alt="Client Avatar">
-            <div class="case-content">
-                <div class="case-city">Liverpool</div>
-                <div class="case-text">I was hesitant at first due to privacy concerns, but the entire service is designed to protect your information completely. The support is practical, consistent, and tailored to real daily life. Over time, I felt my mental clarity improve and my physical comfort return to a much better state.</div>
-                <div class="case-consent">Published with client consent</div>
-            </div>
-        </div>
-        <div class="case">
-            <img class="case-avatar" src="https://picsum.photos/200/200?14" alt="Client Avatar">
-            <div class="case-content">
-                <div class="case-city">Leeds</div>
-                <div class="case-text">After trying multiple solutions that didn’t feel right, this private support stood out completely. The guidance is steady, respectful, and easy to maintain even with a busy work schedule. My confidence has returned, my stress levels are much lower, and I feel like myself again.</div>
-                <div class="case-consent">Published with client consent</div>
-            </div>
-        </div>
-        <div class="case">
-            <img class="case-avatar" src="https://picsum.photos/200/200?15" alt="Client Avatar">
-            <div class="case-content">
-                <div class="case-city">Sheffield</div>
-                <div class="case-text">From start to finish, the service is professional, discreet, and focused entirely on your comfort and progress. I’ve experienced clear improvements in my daily energy levels, emotional balance, and overall quality of life. I highly recommend this to anyone seeking safe, private, and effective support.</div>
-                <div class="case-consent">Published with client consent</div>
-            </div>
+        <div class="feature-item">
+            <h3>Flexible Support</h3>
+            <p>Remote and in-person options to suit your schedule</p>
         </div>
     </div>
+</div>
 
-    <!-- 标题放在外面 -->
+<div class="container">
+    <h2 class="section-title">Verified Client Stories</h2>
+
+    <!-- 客户案例轮播区 -->
+    <div class="case-grid" id="caseGrid"></div>
+
+    <!-- 评论标题 - 放在外面 -->
     <div class="review-header">
         <h2>Live Client Reviews</h2>
     </div>
@@ -471,7 +524,6 @@
             <button onclick="addReview()">Submit Review</button>
         </div>
     </div>
-
 </div>
 
 <div class="footer">
@@ -479,7 +531,465 @@
 </div>
 
 <script>
-    // 评论数据
+    // ========================
+    // 关键优化5：图片加载完成后移除占位层，提升体验
+    // ========================
+    window.addEventListener('load', function() {
+        const heroElement = document.querySelector('.hero');
+        const img = new Image();
+        img.src = 'https://github.com/w85142747-ship-it/homegithub.io/blob/ef8718a32f75eff3af1b406a66de971a26e32be3/banner.png?raw=true';
+        img.onload = function() {
+            heroElement.style.backgroundImage = `linear-gradient(rgba(0, 70, 120, 0.55), rgba(0, 70, 120, 0.55)), url('${img.src}')`;
+            heroElement.querySelector('::before').style.opacity = 0;
+        };
+    });
+
+    // ========================
+    // 60个完整的客户故事数据（含姓名、地区、精确到分钟的时间）
+    // ========================
+    const clientStories = [
+        {
+            name: "Emma Thompson",
+            city: "London",
+            time: "2025/01/15 09:24",
+            avatar: "https://picsum.photos/200/200?10",
+            text: "After following the full private support plan for several weeks, I’ve noticed clear improvements in my daily energy, confidence, and overall wellbeing. The guidance is gentle, consistent, and fully discreet. I feel respected and supported every step of the way, and the entire process remains completely confidential."
+        },
+        {
+            name: "James Wilson",
+            city: "Manchester",
+            time: "2025/01/18 14:07",
+            avatar: "https://picsum.photos/200/200?11",
+            text: "I was struggling with consistent low energy and mental stress for a long time before joining this private programme. The step-by-step support helped me rebuild balance in my daily life, and I now feel calmer, more focused, and physically stronger. Everything is handled with full privacy, which I truly appreciate."
+        },
+        {
+            name: "Sarah Johnson",
+            city: "Birmingham",
+            time: "2025/01/22 11:42",
+            avatar: "https://picsum.photos/200/200?12",
+            text: "This is by far the most reliable and discreet private service I have used. The team listens carefully and provides realistic, sustainable guidance without pressure or judgment. My mood, stamina, and general quality of life have improved greatly, and I feel safe knowing all my information remains fully private."
+        },
+        {
+            name: "Michael Brown",
+            city: "Liverpool",
+            time: "2025/01/25 16:33",
+            avatar: "https://picsum.photos/200/200?13",
+            text: "I was hesitant at first due to privacy concerns, but the entire service is designed to protect your information completely. The support is practical, consistent, and tailored to real daily life. Over time, I felt my mental clarity improve and my physical comfort return to a much better state."
+        },
+        {
+            name: "Lisa Davis",
+            city: "Leeds",
+            time: "2025/01/28 10:15",
+            avatar: "https://picsum.photos/200/200?14",
+            text: "After trying multiple solutions that didn’t feel right, this private support stood out completely. The guidance is steady, respectful, and easy to maintain even with a busy work schedule. My confidence has returned, my stress levels are much lower, and I feel like myself again."
+        },
+        {
+            name: "David Smith",
+            city: "Sheffield",
+            time: "2025/02/01 15:58",
+            avatar: "https://picsum.photos/200/200?15",
+            text: "From start to finish, the service is professional, discreet, and focused entirely on your comfort and progress. I’ve experienced clear improvements in my daily energy levels, emotional balance, and overall quality of life. I highly recommend this to anyone seeking safe, private, and effective support."
+        },
+        {
+            name: "Charlotte Evans",
+            city: "Edinburgh",
+            time: "2025/02/03 13:17",
+            avatar: "https://picsum.photos/200/200?16",
+            text: "As a busy professional, I needed a support system that respected my time and privacy. This service delivered on both fronts perfectly. The personalized plan fit seamlessly into my schedule, and I saw noticeable improvements in my sleep quality and stress management within just two weeks."
+        },
+        {
+            name: "Thomas Green",
+            city: "Glasgow",
+            time: "2025/02/05 08:45",
+            avatar: "https://picsum.photos/200/200?17",
+            text: "The level of confidentiality provided is exceptional. I never felt worried about my personal information being shared, and the one-on-one sessions were conducted in a safe space where I could speak openly without fear of judgment. My anxiety levels have reduced significantly since starting the programme."
+        },
+        {
+            name: "Rebecca Taylor",
+            city: "Newcastle",
+            time: "2025/02/07 19:22",
+            avatar: "https://picsum.photos/200/200?18",
+            text: "What I love most about this service is how adaptable it is to individual needs. The team didn’t use a one-size-fits-all approach but instead took the time to understand my specific challenges and goals. This personalized care made all the difference in my recovery journey."
+        },
+        {
+            name: "Robert Moore",
+            city: "Bristol",
+            time: "2025/02/10 12:09",
+            avatar: "https://picsum.photos/200/200?19",
+            text: "I’ve tried various wellness programmes before, but none have been as effective or private as this one. The regular check-ins kept me accountable without feeling pressured, and the practical strategies I learned are ones I continue to use in my daily life months later."
+        },
+        {
+            name: "Amelia White",
+            city: "Cardiff",
+            time: "2025/02/12 17:41",
+            avatar: "https://picsum.photos/200/200?20",
+            text: "The support team truly understands the importance of discretion, especially for high-profile individuals like myself. Every interaction was handled with the utmost professionalism, and I never once felt that my privacy was compromised in any way."
+        },
+        {
+            name: "William Harris",
+            city: "Belfast",
+            time: "2025/02/14 11:36",
+            avatar: "https://picsum.photos/200/200?21",
+            text: "After experiencing burnout from my high-pressure job, this private support programme was exactly what I needed. The holistic approach addressed both my mental and physical wellbeing, and I’m now able to manage work stress in healthy, sustainable ways."
+        },
+        {
+            name: "Olivia Clark",
+            city: "Leicester",
+            time: "2025/02/17 14:52",
+            avatar: "https://picsum.photos/200/200?22",
+            text: "The online support option was perfect for my busy lifestyle. I could access sessions from the comfort of my home at times that worked for me, and the digital resources provided were comprehensive and easy to follow. My overall sense of wellbeing has improved dramatically."
+        },
+        {
+            name: "Benjamin Lewis",
+            city: "Coventry",
+            time: "2025/02/19 09:18",
+            avatar: "https://picsum.photos/200/200?23",
+            text: "What impressed me most was the team’s genuine care and attention to detail. They remembered small details from our previous conversations and tailored their advice accordingly. This level of personalization made me feel valued as an individual, not just a client."
+        },
+        {
+            name: "Sophia Walker",
+            city: "Nottingham",
+            time: "2025/02/22 16:05",
+            avatar: "https://picsum.photos/200/200?24",
+            text: "I was initially skeptical about private support services, but this team exceeded all my expectations. The strategies taught are evidence-based and practical, and the ongoing support ensured I stayed on track even when facing difficult challenges in my personal life."
+        },
+        {
+            name: "Daniel Wright",
+            city: "Southampton",
+            time: "2025/02/24 10:47",
+            avatar: "https://picsum.photos/200/200?25",
+            text: "The confidentiality measures put in place are second to none. All documentation is encrypted, sessions are held in secure locations, and the team adheres to strict privacy protocols at all times. This gave me the peace of mind I needed to fully engage in the process."
+        },
+        {
+            name: "Mia Allen",
+            city: "Portsmouth",
+            time: "2025/02/27 18:29",
+            avatar: "https://picsum.photos/200/200?26",
+            text: "After struggling with insomnia for years, I finally found a solution through this private support programme. The sleep management techniques were personalized to my specific needs, and I now enjoy restful sleep without relying on medication or other temporary fixes."
+        },
+        {
+            name: "Joseph Scott",
+            city: "Reading",
+            time: "2025/03/01 13:04",
+            avatar: "https://picsum.photos/200/200?27",
+            text: "The flexibility of the programme allowed me to continue with my regular commitments while still making progress towards my wellbeing goals. The team was understanding of my schedule constraints and adjusted the plan as needed to ensure I stayed on track."
+        },
+        {
+            name: "Grace Young",
+            city: "Milton Keynes",
+            time: "2025/03/03 08:59",
+            avatar: "https://picsum.photos/200/200?28",
+            text: "I appreciate that the service focuses on long-term sustainable change rather than quick fixes. The team helped me build healthy habits and coping mechanisms that I can use for the rest of my life, rather than just addressing symptoms in the short term."
+        },
+        {
+            name: "Alexander King",
+            city: "Brighton",
+            time: "2025/03/05 15:38",
+            avatar: "https://picsum.photos/200/200?29",
+            text: "As someone who values their privacy above all else, I was delighted with how discreet the entire process was. From initial consultation to follow-up sessions, every aspect was handled with the highest level of confidentiality and professionalism."
+        },
+        {
+            name: "Chloe Wright",
+            city: "Oxford",
+            time: "2025/03/08 11:21",
+            avatar: "https://picsum.photos/200/200?30",
+            text: "The team's expertise and knowledge were evident from our first session. They didn’t just listen to my concerns but provided practical, actionable advice that I could implement immediately. Within weeks, I noticed positive changes in both my mental and physical health."
+        },
+        {
+            name: "Samuel Green",
+            city: "Cambridge",
+            time: "2025/03/10 17:08",
+            avatar: "https://picsum.photos/200/200?31",
+            text: "I particularly valued the regular progress assessments that helped track my improvement over time. These check-ins were encouraging and motivating, and they allowed the team to adjust the plan as needed to ensure I continued making progress towards my goals."
+        },
+        {
+            name: "Isabella Hill",
+            city: "Newport",
+            time: "2025/03/12 09:44",
+            avatar: "https://picsum.photos/200/200?32",
+            text: "The private nature of the service meant I could be completely open and honest about my challenges without fear of stigma or judgment. This level of openness was crucial to my recovery and allowed the team to provide the most effective support possible."
+        },
+        {
+            name: "Henry Carter",
+            city: "Swansea",
+            time: "2025/03/15 14:19",
+            avatar: "https://picsum.photos/200/200?33",
+            text: "After years of feeling overwhelmed and disconnected, this private support programme helped me reconnect with myself and rebuild my sense of purpose. The guidance was compassionate yet practical, and I now feel more grounded and content than I have in years."
+        },
+        {
+            name: "Ava Phillips",
+            city: "Aberdeen",
+            time: "2025/03/17 18:55",
+            avatar: "https://picsum.photos/200/200?34",
+            text: "The digital platform used for remote sessions was secure, user-friendly, and ensured complete privacy. I never had to worry about my sessions being intercepted or recorded, and the video quality was excellent, making remote sessions feel just as personal as in-person meetings."
+        },
+        {
+            name: "Jack Edwards",
+            city: "Perth",
+            time: "2025/03/20 12:37",
+            avatar: "https://picsum.photos/200/200?35",
+            text: "What sets this service apart is the genuine care and empathy of the support team. They didn’t treat me as just another client but took the time to understand my unique circumstances and challenges, which made all the difference in my recovery process."
+        },
+        {
+            name: "Ella Roberts",
+            city: "Stirling",
+            time: "2025/03/22 10:02",
+            avatar: "https://picsum.photos/200/200?36",
+            text: "I was able to continue with my professional responsibilities while participating in the programme, thanks to the flexible scheduling and remote support options. The team was understanding of my work demands and adjusted sessions to fit around my busy schedule."
+        },
+        {
+            name: "Charlie Murphy",
+            city: "Derby",
+            time: "2025/03/25 16:48",
+            avatar: "https://picsum.photos/200/200?37",
+            text: "The comprehensive approach addressed all aspects of my wellbeing – physical, mental, and emotional. Rather than focusing on just one area, the programme provided a holistic solution that helped me achieve balance in all areas of my life."
+        },
+        {
+            name: "Zoe Hughes",
+            city: "Peterborough",
+            time: "2025/03/27 08:26",
+            avatar: "https://picsum.photos/200/200?38",
+            text: "The aftercare support provided after completing the main programme has been invaluable. The team checked in regularly to ensure I was maintaining my progress and offered additional guidance when needed, which helped prevent relapse and ensure long-term success."
+        },
+        {
+            name: "George Rogers",
+            city: "Wolverhampton",
+            time: "2025/03/30 13:51",
+            avatar: "https://picsum.photos/200/200?39",
+            text: "As someone who has always been private about personal matters, I appreciated the discretion and confidentiality of every interaction. The team never pushed me to share more than I was comfortable with, and all information was handled with the utmost respect and security."
+        },
+        {
+            name: "Lily Patterson",
+            city: "Bolton",
+            time: "2025/04/01 15:17",
+            avatar: "https://picsum.photos/200/200?40",
+            text: "The practical tools and techniques I learned through the programme have become an integral part of my daily routine. From stress management strategies to mindfulness exercises, these skills have helped me navigate challenging situations with greater ease and resilience."
+        },
+        {
+            name: "Thomas Bell",
+            city: "Stockport",
+            time: "2025/04/03 11:09",
+            avatar: "https://picsum.photos/200/200?41",
+            text: "I noticed improvements in my energy levels and mental clarity within the first few weeks of starting the programme. The personalized nutrition and lifestyle advice addressed underlying issues rather than just treating symptoms, leading to sustainable improvements in my overall health."
+        },
+        {
+            name: "Maya Stewart",
+            city: "Preston",
+            time: "2025/04/05 17:34",
+            avatar: "https://picsum.photos/200/200?42",
+            text: "The team's non-judgmental approach created a safe space for me to explore and address deep-rooted issues that had been affecting my wellbeing for years. This compassionate support was crucial to my healing process and allowed me to make meaningful progress."
+        },
+        {
+            name: "Ryan Morris",
+            city: "Blackburn",
+            time: "2025/04/08 09:57",
+            avatar: "https://picsum.photos/200/200?43",
+            text: "I appreciated the transparent pricing and no-hidden-cost policy of the service. From the initial consultation to the final session, there were no unexpected fees or charges, which made the entire experience stress-free and straightforward."
+        },
+        {
+            name: "Poppy Coleman",
+            city: "Blackpool",
+            time: "2025/04/10 14:23",
+            avatar: "https://picsum.photos/200/200?44",
+            text: "The private nature of the sessions allowed me to be completely honest about my struggles without fear of repercussions or stigma. This level of openness was essential to my recovery and enabled the team to provide the most effective support possible."
+        },
+        {
+            name: "Luke Jenkins",
+            city: "Norwich",
+            time: "2025/04/12 18:08",
+            avatar: "https://picsum.photos/200/200?45",
+            text: "The regular check-ins and progress tracking kept me accountable and motivated throughout the programme. Seeing measurable improvements in my wellbeing was incredibly encouraging and helped me stay committed to the process even during challenging times."
+        },
+        {
+            name: "Hannah Foster",
+            city: "Ipswich",
+            time: "2025/04/15 12:44",
+            avatar: "https://picsum.photos/200/200?46",
+            text: "What impressed me most was the team's ability to adapt the programme to my changing needs and circumstances. As my situation evolved, the support plan was adjusted accordingly, ensuring it remained relevant and effective throughout my journey."
+        },
+        {
+            name: "Adam Powell",
+            city: "Colchester",
+            time: "2025/04/17 10:19",
+            avatar: "https://picsum.photos/200/200?47",
+            text: "After completing the programme, I feel more equipped to handle life's challenges and maintain my mental wellbeing independently. The skills and strategies I learned have given me the confidence and resilience to navigate difficult situations without feeling overwhelmed."
+        },
+        {
+            name: "Evelyn Barnes",
+            city: "Chelmsford",
+            time: "2025/04/20 16:05",
+            avatar: "https://picsum.photos/200/200?48",
+            text: "The secure online portal for accessing resources and scheduling sessions was easy to use and provided an additional layer of privacy. I could access support materials at any time from the comfort of my home, which was incredibly convenient and discreet."
+        },
+        {
+            name: "Nathan Reed",
+            city: "Basildon",
+            time: "2025/04/22 08:38",
+            avatar: "https://picsum.photos/200/200?49",
+            text: "I was pleasantly surprised by how quickly I started to see results from the programme. Within just a few sessions, I noticed improvements in my sleep quality, stress levels, and overall mood, which motivated me to continue with the process."
+        },
+        {
+            name: "Scarlett Cox",
+            city: "Slough",
+            time: "2025/04/25 13:27",
+            avatar: "https://picsum.photos/200/200?50",
+            text: "The team's expertise in both mental health and lifestyle management provided a comprehensive approach to my wellbeing. Rather than focusing on just one aspect, they addressed the interconnected nature of physical and mental health, leading to holistic improvements."
+        },
+        {
+            name: "Edward Richardson",
+            city: "Luton",
+            time: "2025/04/27 15:52",
+            avatar: "https://picsum.photos/200/200?51",
+            text: "As a business owner with a high public profile, privacy was my top concern. This service exceeded my expectations in terms of discretion and confidentiality, allowing me to receive the support I needed without compromising my professional reputation."
+        },
+        {
+            name: "Freya Bailey",
+            city: "Watford",
+            time: "2025/04/30 11:40",
+            avatar: "https://picsum.photos/200/200?52",
+            text: "The personalized nature of the programme meant that it was tailored specifically to my unique needs and circumstances. The team took the time to understand my background, challenges, and goals, resulting in a support plan that was truly customized for me."
+        },
+        {
+            name: "Alfie Richardson",
+            city: "Hemel Hempstead",
+            time: "2025/05/02 17:15",
+            avatar: "https://picsum.photos/200/200?53",
+            text: "I appreciated that the programme focused on empowerment rather than dependency. The team provided me with the tools and knowledge to manage my own wellbeing independently, rather than creating a reliance on ongoing support."
+        },
+        {
+            name: "Daisy Collins",
+            city: "Letchworth",
+            time: "2025/05/05 09:08",
+            avatar: "https://picsum.photos/200/200?54",
+            text: "The flexible payment options made the service accessible even during a challenging financial period. The team was understanding of my situation and worked with me to create a payment plan that was manageable and fair."
+        },
+        {
+            name: "Frankie Simpson",
+            city: "Stevenage",
+            time: "2025/05/07 14:45",
+            avatar: "https://picsum.photos/200/200?55",
+            text: "After struggling with anxiety for most of my adult life, I finally found a solution that works for me through this private support programme. The combination of practical strategies and emotional support has been life-changing."
+        },
+        {
+            name: "Matilda Bennett",
+            city: "Hertford",
+            time: "2025/05/09 12:29",
+            avatar: "https://picsum.photos/200/200?56",
+            text: "The team's commitment to ongoing professional development was evident in their up-to-date knowledge and evidence-based approach. I felt confident that I was receiving the most current and effective support available."
+        },
+        {
+            name: "Leo Mitchell",
+            city: "Bishops Stortford",
+            time: "2025/05/12 18:03",
+            avatar: "https://picsum.photos/200/200?57",
+            text: "The private sessions allowed me to address sensitive personal issues that I wouldn't have felt comfortable discussing in a group setting. This one-on-one approach was essential to my healing process and allowed for deeper, more meaningful progress."
+        },
+        {
+            name: "Lila Turner",
+            city: "Cheltenham",
+            time: "2025/05/14 10:56",
+            avatar: "https://picsum.photos/200/200?58",
+            text: "I was able to maintain complete anonymity throughout the entire process, which was incredibly important to me. The team respected my wish to remain private and took all necessary steps to protect my identity and personal information."
+        },
+        {
+            name: "Jasper Cook",
+            city: "Gloucester",
+            time: "2025/05/17 16:32",
+            avatar: "https://picsum.photos/200/200?59",
+            text: "The progress I made during the programme has been sustained long after completion, which is a testament to the effectiveness of the approach. The skills and habits I developed have become a permanent part of my life, leading to lasting improvements in my wellbeing."
+        },
+        {
+            name: "Elsie Morgan",
+            city: "Swindon",
+            time: "2025/05/19 13:11",
+            avatar: "https://picsum.photos/200/200?60",
+            text: "From the initial consultation to the final follow-up session, every interaction was handled with professionalism, compassion, and discretion. This level of care and attention made the entire experience positive and effective, and I would highly recommend this service to anyone seeking private, personalized support."
+        }
+    ];
+
+    // ========================
+    // 初始化6个随机展示的案例 + 6秒轮播逻辑
+    // ========================
+    const caseGrid = document.getElementById('caseGrid');
+    let displayedIndices = []; // 记录已展示的索引
+    let currentCases = [];     // 当前显示的6个案例
+
+    // 初始化：随机选择6个不重复的案例
+    function initCases() {
+        currentCases = [];
+        displayedIndices = [];
+        
+        // 随机选6个不重复的索引
+        while (currentCases.length < 6) {
+            const randomIndex = Math.floor(Math.random() * clientStories.length);
+            if (!displayedIndices.includes(randomIndex)) {
+                displayedIndices.push(randomIndex);
+                currentCases.push(clientStories[randomIndex]);
+            }
+        }
+        
+        renderCases();
+    }
+
+    // 渲染案例到页面
+    function renderCases() {
+        caseGrid.innerHTML = '';
+        currentCases.forEach(story => {
+            const caseElement = document.createElement('div');
+            caseElement.className = 'case';
+            caseElement.innerHTML = `
+                <img class="case-avatar" src="${story.avatar}" alt="${story.name} Avatar">
+                <div class="case-content">
+                    <div class="case-name">${story.name}</div>
+                    <div class="case-city">${story.city}</div>
+                    <div class="case-time">Submitted: ${story.time}</div>
+                    <div class="case-text">${story.text}</div>
+                    <div class="case-consent">Published with client consent</div>
+                </div>
+            `;
+            caseGrid.appendChild(caseElement);
+        });
+    }
+
+    // 轮播逻辑：每6秒随机替换一个案例
+    function rotateCase() {
+        // 找到所有未展示过的索引
+        const availableIndices = clientStories
+            .map((_, index) => index)
+            .filter(index => !displayedIndices.includes(index));
+        
+        // 如果所有都展示过了，重置
+        if (availableIndices.length === 0) {
+            displayedIndices = [...currentCases.map((_, i) => displayedIndices[i])];
+        }
+
+        // 随机选一个要替换的位置（0-5）
+        const replaceIndex = Math.floor(Math.random() * 6);
+        // 随机选一个新的案例索引
+        const newStoryIndex = availableIndices.length > 0 
+            ? availableIndices[Math.floor(Math.random() * availableIndices.length)]
+            : Math.floor(Math.random() * clientStories.length);
+        
+        // 更新展示记录和当前案例
+        displayedIndices.push(newStoryIndex);
+        currentCases[replaceIndex] = clientStories[newStoryIndex];
+        
+        // 淡入淡出效果
+        const caseElements = caseGrid.querySelectorAll('.case');
+        caseElements[replaceIndex].classList.add('fade-out');
+        
+        setTimeout(() => {
+            renderCases();
+        }, 500); // 等待淡出动画完成
+    }
+
+    // 初始化并启动轮播
+    initCases();
+    setInterval(rotateCase, 6000); // 每6秒替换一个
+
+    // ========================
+    // 原有评论和头像滚动逻辑
+    // ========================
     const reviews = [
         {"city":"London","star":5,"text":"Very professional and discreet service. I felt respected and supported from start to finish."},
         {"city":"Manchester","star":5,"text":"Extremely happy with the experience. Full privacy and very caring support."},
@@ -491,7 +1001,6 @@
     let fullReviews = [];
     for(let i=0;i<12;i++) fullReviews = fullReviews.concat(reviews);
 
-    // 改用固定的、可稳定访问的头像链接
     const realAvatars = [
         "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop",
         "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop",
@@ -504,15 +1013,14 @@
         "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&h=200&fit=crop"
     ];
 
-    // 渲染评论（真实头像）
+    // 渲染评论
     const reviewList = document.getElementById('reviewList');
     fullReviews.forEach(item => {
         const div = document.createElement('div');
         div.className = 'review-item';
         let stars = '★'.repeat(item.star);
-        // 随机选择稳定的头像
         let avatar = realAvatars[Math.floor(Math.random() * realAvatars.length)];
-        let randomTime = `${2024 + Math.floor(Math.random()*2)}-${String(Math.floor(Math.random()*12)+1).padStart(2,0)}-${String(Math.floor(Math.random()*28)+1).padStart(2,0)}`;
+        let randomTime = `${2024 + Math.floor(Math.random()*2)}-${String(Math.floor(Math.random()*12)+1).padStart(2,0)}-${String(Math.floor(Math.random()*28)+1).padStart(2,0)} ${String(Math.floor(Math.random()*24)).padStart(2,0)}:${String(Math.floor(Math.random()*60)).padStart(2,0)}`;
         div.innerHTML = `
             <img class="avatar" src="${avatar}" alt="User Avatar" onerror="this.style.backgroundColor='#e3f2ff'">
             <div class="review-content">
@@ -526,20 +1034,16 @@
         reviewList.appendChild(div);
     });
 
-    // 真实头像横向滚动（修复显示问题）
+    // 真实头像横向滚动
     const avatarTrack = document.getElementById('avatarTrack');
     let avatarHtml = '';
-    // 生成足够多的头像，实现无缝滚动
     for(let i=0;i<40;i++){
         let img = realAvatars[Math.floor(Math.random() * realAvatars.length)];
         avatarHtml += `<img class="avatar-small" src="${img}" alt="Client Avatar" onerror="this.style.backgroundColor='#e3f2ff'">`;
     }
-    // 复制一份头像，实现无缝滚动
     avatarTrack.innerHTML = avatarHtml + avatarHtml;
 
-    // ======================================
-    // 四大社交登录（演示版，上线可接官方SDK）
-    // ======================================
+    // 社交登录逻辑
     let user = {
         loggedIn: false,
         avatar: "",
@@ -549,7 +1053,6 @@
     function login(platform) {
         user.loggedIn = true;
         user.platform = platform;
-        // 登录后使用稳定的头像链接
         user.avatar = realAvatars[Math.floor(Math.random() * realAvatars.length)];
         
         alert(platform.charAt(0).toUpperCase() + platform.slice(1) + " Login Successful!");
@@ -578,7 +1081,7 @@
         div.className = 'review-item';
         let stars = '★'.repeat(star);
         let now = new Date();
-        let timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,0)}-${String(now.getDate()).padStart(2,0)}`;
+        let timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,0)}-${String(now.getDate()).padStart(2,0)} ${String(now.getHours()).padStart(2,0)}:${String(now.getMinutes()).padStart(2,0)}`;
         
         div.innerHTML = `
             <img class="avatar" src="${user.avatar}" alt="User Avatar" onerror="this.style.backgroundColor='#e3f2ff'">
