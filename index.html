@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UK Client Reviews | Private Support</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            background: #f8f9fc;
+            color: #2a2a2a;
+            line-height: 1.6;
+        }
+
+        .hero {
+            width: 100%;
+            height: 680px;
+            background: linear-gradient(rgba(0, 70, 120, 0.55), rgba(0, 70, 120, 0.55)), 
+                        url('https://picsum.photos/1600/900') center top no-repeat;
+            background-size: cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .hero h1 {
+            font-size: 52px;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .hero p {
+            font-size: 24px;
+            opacity: 0.95;
+            max-width: 700px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 32px;
+            margin: 80px 0 30px 0;
+            color: #222;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            width: 70px;
+            height: 4px;
+            background: #007bcc;
+            border-radius: 4px;
+            display: block;
+            margin: 12px auto 0;
+        }
+
+        /* 客户案例高端样式 */
+        .case-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .case {
+            background: white;
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+            display: flex;
+            align-items: flex-start;
+            gap: 26px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .case:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 28px rgba(0,0,0,0.08);
+        }
+
+        .case-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+            /* 确保头像加载失败时显示背景色 */
+            background-color: #e3f2ff;
+            display: block;
+        }
+
+        .case-content { flex: 1; }
+        .case-city { font-size: 18px; font-weight: 600; color: #007bcc; margin-bottom: 10px; }
+        .case-text { font-size: 16px; line-height: 1.7; color: #3d3d3d; margin-bottom: 14px; }
+        .case-consent { font-size: 14px; color: #28a745; font-weight: 600; }
+
+        /* 评论标题 - 放在外面，不遮挡 */
+        .review-header {
+            text-align: center;
+            margin: 90px 0 20px 0;
+        }
+        .review-header h2 {
+            font-size: 32px;
+            color: #222;
+            position: relative;
+            display: inline-block;
+        }
+        .review-header h2::after {
+            content: '';
+            width: 70px;
+            height: 4px;
+            background: #007bcc;
+            border-radius: 4px;
+            display: block;
+            margin: 12px auto 0;
+        }
+
+        /* 滚动评论区 */
+        .scroll-review {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            margin: 0 0 40px 0;
+            overflow: hidden;
+            height: 520px;
+            position: relative;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+        }
+
+        .review-wrapper {
+            position: absolute;
+            width: calc(100% - 80px);
+            top: 40px;
+            animation: scroll 75s linear infinite;
+        }
+
+        @keyframes scroll {
+            0% { top: 40px; }
+            100% { top: -13000px; }
+        }
+
+        .review-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 16px 0;
+            border-bottom: 1px solid #f2f2f2;
+            /* 确保每个评论项布局稳定 */
+            min-height: 80px;
+        }
+
+        /* 真实头像 - 修复显示问题 */
+        .avatar {
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 14px;
+            flex-shrink: 0;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+            /* 关键修复：确保头像必显示，加载失败有备用背景 */
+            background-color: #e3f2ff;
+            display: block !important;
+            /* 预加载头像避免闪烁 */
+            image-rendering: auto;
+        }
+
+        .review-content { flex: 1; }
+        .review-city { font-size: 13px; color: #777; margin-bottom: 4px; }
+        .review-time { font-size: 12px; color: #999; margin-bottom: 4px; }
+        .stars { color: #ffc107; font-size: 15px; margin-bottom: 6px; }
+        .review-text { font-size: 15px; line-height: 1.6; margin-bottom: 6px; color: #333; }
+        .verified { font-size: 13px; color: #007bcc; font-weight: 600; }
+
+        /* 横向真实头像滚动 - 修复显示问题 */
+        .avatar-scroll {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            margin: 40px 0;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+            /* 确保容器高度稳定 */
+            min-height: 90px;
+        }
+        .avatar-track {
+            display: flex;
+            gap: 16px;
+            animation: avatarScroll 25s linear infinite;
+            /* 复制一份头像列表，实现无缝滚动 */
+            width: max-content;
+        }
+        /* 关键修复：横向滚动头像必显示 */
+        .avatar-small {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+            background-color: #e3f2ff;
+            display: block !important;
+        }
+        @keyframes avatarScroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* 连续滚动文字 + 背景美观 */
+        .text-scroll {
+            width: 100%;
+            background: #e3f2ff;
+            padding: 14px 0;
+            border-radius: 14px;
+            margin-bottom: 40px;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        .text-scroll-content {
+            display: inline-block;
+            font-size: 15px;
+            color: #007bcc;
+            font-weight: 600;
+            animation: textScroll 14s linear infinite;
+        }
+        @keyframes textScroll {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* 四大社交登录按钮 */
+        .social-login-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .social-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 15px;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+        .social-btn img {
+            width: 24px;
+            height: 24px;
+        }
+        .btn-google {
+            background: white;
+            color: #444;
+            border: 1px solid #ddd;
+        }
+        .btn-google:hover { background: #f5f5f5; }
+        .btn-apple {
+            background: #000;
+            color: white;
+        }
+        .btn-apple:hover { background: #222; }
+        .btn-fb {
+            background: #1877f2;
+            color: white;
+        }
+        .btn-fb:hover { background: #0d65d1; }
+        .btn-ins {
+            background: linear-gradient(45deg, #405de6, #5851db, #833ab4, #c13584, #e1306c, #fd1d1d);
+            color: white;
+        }
+        .btn-ins:hover { opacity: 0.9; }
+
+        /* 提交评论 */
+        .review-form {
+            background: white;
+            padding: 50px;
+            border-radius: 24px;
+            margin: 60px 0;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.06);
+            border: 1px solid #eef2f8;
+        }
+        .form-group { margin-bottom: 24px; }
+        .form-group label { display: block; margin-bottom: 10px; font-weight: 600; font-size: 15px; color: #222; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 14px;
+            font-size: 15px;
+            background: #fdfdfd;
+            transition: all 0.3s;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            border: 1px solid #007bcc;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0,123,204,0.1);
+        }
+        button {
+            background: #007bcc;
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 14px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background 0.3s, transform 0.2s;
+        }
+        button:hover { 
+            background: #0066aa;
+            transform: translateY(-2px);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- 顶部全屏大图 -->
+<div class="hero">
+    <h1>Our Professional Support Team</h1>
+    <p>Private • Discreet • Trusted UK Client Reviews</p>
+</div>
+
+<div class="container">
+
+    <h2 class="section-title">Verified Client Stories</h2>
+
+    <!-- 6个高端客户案例 -->
+    <div class="case-grid">
+        <div class="case">
+            <img class="case-avatar" src="https://picsum.photos/200/200?10" alt="Client Avatar">
+            <div class="case-content">
+                <div class="case-city">London</div>
+                <div class="case-text">After following the full private support plan for several weeks, I’ve noticed clear improvements in my daily energy, confidence, and overall wellbeing. The guidance is gentle, consistent, and fully discreet. I feel respected and supported every step of the way, and the entire process remains completely confidential.</div>
+                <div class="case-consent">Published with client consent</div>
+            </div>
+        </div>
+        <div class="case">
+            <img class="case-avatar" src="https://picsum.photos/200/200?11" alt="Client Avatar">
+            <div class="case-content">
+                <div class="case-city">Manchester</div>
+                <div class="case-text">I was struggling with consistent low energy and mental stress for a long time before joining this private programme. The step-by-step support helped me rebuild balance in my daily life, and I now feel calmer, more focused, and physically stronger. Everything is handled with full privacy, which I truly appreciate.</div>
+                <div class="case-consent">Published with client consent</div>
+            </div>
+        </div>
+        <div class="case">
+            <img class="case-avatar" src="https://picsum.photos/200/200?12" alt="Client Avatar">
+            <div class="case-content">
+                <div class="case-city">Birmingham</div>
+                <div class="case-text">This is by far the most reliable and discreet private service I have used. The team listens carefully and provides realistic, sustainable guidance without pressure or judgment. My mood, stamina, and general quality of life have improved greatly, and I feel safe knowing all my information remains fully private.</div>
+                <div class="case-consent">Published with client consent</div>
+            </div>
+        </div>
+        <div class="case">
+            <img class="case-avatar" src="https://picsum.photos/200/200?13" alt="Client Avatar">
+            <div class="case-content">
+                <div class="case-city">Liverpool</div>
+                <div class="case-text">I was hesitant at first due to privacy concerns, but the entire service is designed to protect your information completely. The support is practical, consistent, and tailored to real daily life. Over time, I felt my mental clarity improve and my physical comfort return to a much better state.</div>
+                <div class="case-consent">Published with client consent</div>
+            </div>
+        </div>
+        <div class="case">
+            <img class="case-avatar" src="https://picsum.photos/200/200?14" alt="Client Avatar">
+            <div class="case-content">
+                <div class="case-city">Leeds</div>
+                <div class="case-text">After trying multiple solutions that didn’t feel right, this private support stood out completely. The guidance is steady, respectful, and easy to maintain even with a busy work schedule. My confidence has returned, my stress levels are much lower, and I feel like myself again.</div>
+                <div class="case-consent">Published with client consent</div>
+            </div>
+        </div>
+        <div class="case">
+            <img class="case-avatar" src="https://picsum.photos/200/200?15" alt="Client Avatar">
+            <div class="case-content">
+                <div class="case-city">Sheffield</div>
+                <div class="case-text">From start to finish, the service is professional, discreet, and focused entirely on your comfort and progress. I’ve experienced clear improvements in my daily energy levels, emotional balance, and overall quality of life. I highly recommend this to anyone seeking safe, private, and effective support.</div>
+                <div class="case-consent">Published with client consent</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 标题放在外面 -->
+    <div class="review-header">
+        <h2>Live Client Reviews</h2>
+    </div>
+
+    <!-- 滚动评论区 -->
+    <div class="scroll-review">
+        <div class="review-wrapper" id="reviewList"></div>
+    </div>
+
+    <!-- 真实头像滚动 -->
+    <div class="avatar-scroll">
+        <div class="avatar-track" id="avatarTrack"></div>
+    </div>
+
+    <!-- 连续滚动文字 + 美观背景 -->
+    <div class="text-scroll">
+        <div class="text-scroll-content">Liverpool client submitted a story feedback</div>
+    </div>
+
+    <!-- 社交登录 + 提交评论 -->
+    <div class="review-form">
+        <h2 class="section-title" style="margin-top:0;">Share Your Experience</h2>
+        
+        <div id="loginArea">
+            <div class="social-login-group">
+                <button class="social-btn btn-google" onclick="login('google')">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2991/2991148.png" alt="Google Icon">
+                    Sign in with Google
+                </button>
+                <button class="social-btn btn-apple" onclick="login('apple')">
+                    <img src="https://cdn-icons-png.flaticon.com/512/5085/5085202.png" alt="Apple Icon">
+                    Sign in with Apple
+                </button>
+                <button class="social-btn btn-fb" onclick="login('facebook')">
+                    <img src="https://cdn-icons-png.flaticon.com/512/5968/5968764.png" alt="Facebook Icon">
+                    Sign in with Facebook
+                </button>
+                <button class="social-btn btn-ins" onclick="login('instagram')">
+                    <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" alt="Instagram Icon">
+                    Sign in with Instagram
+                </button>
+            </div>
+        </div>
+
+        <div id="reviewFormArea" style="display: none;">
+            <div class="form-group">
+                <label>City</label>
+                <input type="text" id="city" placeholder="Enter your city" required>
+            </div>
+            <div class="form-group">
+                <label>Rating</label>
+                <select id="rating" required>
+                    <option value="5">5 Stars</option>
+                    <option value="4">4 Stars</option>
+                    <option value="3">3 Stars</option>
+                    <option value="2">2 Stars</option>
+                    <option value="1">1 Star</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Your Review</label>
+                <textarea id="reviewText" rows="4" placeholder="Write your review" required></textarea>
+            </div>
+            <button onclick="addReview()">Submit Review</button>
+        </div>
+    </div>
+
+</div>
+
+<div class="footer">
+    &copy; 2025 UK Client Reviews | All Reviews Are Published With Consent
+</div>
+
+<script>
+    // 评论数据
+    const reviews = [
+        {"city":"London","star":5,"text":"Very professional and discreet service. I felt respected and supported from start to finish."},
+        {"city":"Manchester","star":5,"text":"Extremely happy with the experience. Full privacy and very caring support."},
+        {"city":"Birmingham","star":5,"text":"The best private service I have tried. Very understanding and completely confidential."},
+        {"city":"Liverpool","star":5,"text":"Great communication and very supportive. All privacy is well protected."},
+        {"city":"Leeds","star":5,"text":"Very satisfied with the whole service. Professional, discreet and highly reliable."}
+    ];
+
+    let fullReviews = [];
+    for(let i=0;i<12;i++) fullReviews = fullReviews.concat(reviews);
+
+    // 改用固定的、可稳定访问的头像链接
+    const realAvatars = [
+        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop",
+        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop",
+        "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&h=200&fit=crop",
+        "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&h=200&fit=crop",
+        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop",
+        "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&h=200&fit=crop",
+        "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=200&h=200&fit=crop",
+        "https://images.unsplash.com/photo-1557296387-15300691775d?w=200&h=200&fit=crop",
+        "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&h=200&fit=crop"
+    ];
+
+    // 渲染评论（真实头像）
+    const reviewList = document.getElementById('reviewList');
+    fullReviews.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'review-item';
+        let stars = '★'.repeat(item.star);
+        // 随机选择稳定的头像
+        let avatar = realAvatars[Math.floor(Math.random() * realAvatars.length)];
+        let randomTime = `${2024 + Math.floor(Math.random()*2)}-${String(Math.floor(Math.random()*12)+1).padStart(2,0)}-${String(Math.floor(Math.random()*28)+1).padStart(2,0)}`;
+        div.innerHTML = `
+            <img class="avatar" src="${avatar}" alt="User Avatar" onerror="this.style.backgroundColor='#e3f2ff'">
+            <div class="review-content">
+                <div class="review-city">${item.city}</div>
+                <div class="review-time">${randomTime}</div>
+                <div class="stars">${stars}</div>
+                <div class="review-text">${item.text}</div>
+                <div class="verified">Verified Client</div>
+            </div>
+        `;
+        reviewList.appendChild(div);
+    });
+
+    // 真实头像横向滚动（修复显示问题）
+    const avatarTrack = document.getElementById('avatarTrack');
+    let avatarHtml = '';
+    // 生成足够多的头像，实现无缝滚动
+    for(let i=0;i<40;i++){
+        let img = realAvatars[Math.floor(Math.random() * realAvatars.length)];
+        avatarHtml += `<img class="avatar-small" src="${img}" alt="Client Avatar" onerror="this.style.backgroundColor='#e3f2ff'">`;
+    }
+    // 复制一份头像，实现无缝滚动
+    avatarTrack.innerHTML = avatarHtml + avatarHtml;
+
+    // ======================================
+    // 四大社交登录（演示版，上线可接官方SDK）
+    // ======================================
+    let user = {
+        loggedIn: false,
+        avatar: "",
+        platform: ""
+    };
+
+    function login(platform) {
+        user.loggedIn = true;
+        user.platform = platform;
+        // 登录后使用稳定的头像链接
+        user.avatar = realAvatars[Math.floor(Math.random() * realAvatars.length)];
+        
+        alert(platform.charAt(0).toUpperCase() + platform.slice(1) + " Login Successful!");
+        
+        document.getElementById('loginArea').style.display = 'none';
+        document.getElementById('reviewFormArea').style.display = 'block';
+    }
+
+    // 提交评论
+    function addReview() {
+        if(!user.loggedIn) {
+            alert("Please login first to post a review");
+            return;
+        }
+
+        const city = document.getElementById('city').value;
+        const star = document.getElementById('rating').value;
+        const text = document.getElementById('reviewText').value;
+        
+        if(!city || !text) {
+            alert('Please fill all fields');
+            return;
+        }
+
+        const div = document.createElement('div');
+        div.className = 'review-item';
+        let stars = '★'.repeat(star);
+        let now = new Date();
+        let timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,0)}-${String(now.getDate()).padStart(2,0)}`;
+        
+        div.innerHTML = `
+            <img class="avatar" src="${user.avatar}" alt="User Avatar" onerror="this.style.backgroundColor='#e3f2ff'">
+            <div class="review-content">
+                <div class="review-city">${city}</div>
+                <div class="review-time">${timeStr}</div>
+                <div class="stars">${stars}</div>
+                <div class="review-text">${text}</div>
+                <div class="verified">Verified Client (${user.platform})</div>
+            </div>
+        `;
+
+        reviewList.prepend(div);
+        alert('Review submitted successfully!');
+        document.getElementById('city').value = '';
+        document.getElementById('reviewText').value = '';
+    }
+</script>
+
+</body>
+</html>
