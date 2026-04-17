@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UK Client Reviews | Private Support</title>
-    <!-- 关键优化1：预加载头部大图，提升加载优先级 -->
+    <!-- 预加载头部大图，提升加载优先级 -->
     <link rel="preload" href="https://github.com/w85142747-ship-it/homegithub.io/blob/ef8718a32f75eff3af1b406a66de971a26e32be3/banner.png?raw=true" as="image">
     <style>
         * {
@@ -20,12 +20,12 @@
             line-height: 1.6;
         }
 
-        /* 关键优化2：头部大图容器优化 - 懒加载+渐进式显示 */
+        /* 核心修复：头部大图容器 - 降低渐变透明度，移除蓝色混合模式 */
         .hero {
             width: 100%;
             height: 680px;
-            /* 使用raw=true获取原始图片，避免GitHub页面嵌套 */
-            background: linear-gradient(rgba(0, 70, 120, 0.55), rgba(0, 70, 120, 0.55)), 
+            /* 关键修改：渐变透明度从0.55降到0.15，大幅减少蓝色遮罩 */
+            background: linear-gradient(rgba(0, 70, 120, 0.15), rgba(0, 70, 120, 0.15)), 
                         url('https://github.com/w85142747-ship-it/homegithub.io/blob/ef8718a32f75eff3af1b406a66de971a26e32be3/banner.png?raw=true') center top no-repeat;
             background-size: cover;
             display: flex;
@@ -36,13 +36,14 @@
             text-align: center;
             padding: 20px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            /* 优化3：背景图片加载过渡，避免白屏 */
-            background-color: #004678; /* 备用背景色，与渐变匹配 */
-            background-blend-mode: overlay;
+            /* 移除蓝色混合模式，保留浅灰色备用背景（避免白屏） */
+            background-color: #f8f9fc; 
             transition: background-image 0.5s ease-in-out;
+            /* 新增：文字阴影，提升可读性 */
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
 
-        /* 关键优化4：图片加载前的占位样式 */
+        /* 移除过暗的占位层，保留轻量占位 */
         .hero::before {
             content: "";
             position: absolute;
@@ -50,7 +51,7 @@
             left: 0;
             width: 100%;
             height: 680px;
-            background: rgba(0, 70, 120, 0.3);
+            background: rgba(0, 0, 0, 0.05); /* 几乎透明的浅黑，不影响图片原色 */
             z-index: -1;
             opacity: 1;
             transition: opacity 0.5s ease;
@@ -60,8 +61,9 @@
             font-size: 52px;
             margin-bottom: 16px;
             font-weight: 600;
-            /* 文字抗锯齿，提升加载时的视觉体验 */
             -webkit-font-smoothing: antialiased;
+            /* 新增：加粗文字描边，提升在浅色背景上的可读性 */
+            text-shadow: 0 2px 8px rgba(0,0,0,0.4);
         }
 
         .hero p {
@@ -69,6 +71,7 @@
             opacity: 0.95;
             max-width: 700px;
             -webkit-font-smoothing: antialiased;
+            text-shadow: 0 1px 6px rgba(0,0,0,0.3);
         }
 
         /* 新增服务介绍样式 */
@@ -422,8 +425,11 @@
 
 <!-- 顶部全屏大图 -->
 <div class="hero">
-    <h1>Our Professional Support Team</h1>
-    <p>Private • Discreet • Trusted UK Client Reviews</p>
+    <!-- 可选：如果需要换回英文标题，替换下面两行即可 -->
+    <!-- <h1>Our Professional Support Team</h1>
+    <p>Private • Discreet • Trusted UK Client Reviews</p> -->
+    <h1>我们的专业支持团队</h1>
+    <p>私密 • 谨慎 • 值得信赖的英国客户评价</p>
 </div>
 
 <!-- 新增服务介绍模块 -->
@@ -531,22 +537,18 @@
 </div>
 
 <script>
-    // ========================
-    // 关键优化5：图片加载完成后移除占位层，提升体验
-    // ========================
+    // 图片加载完成后平滑显示，保留加速逻辑
     window.addEventListener('load', function() {
         const heroElement = document.querySelector('.hero');
         const img = new Image();
         img.src = 'https://github.com/w85142747-ship-it/homegithub.io/blob/ef8718a32f75eff3af1b406a66de971a26e32be3/banner.png?raw=true';
         img.onload = function() {
-            heroElement.style.backgroundImage = `linear-gradient(rgba(0, 70, 120, 0.55), rgba(0, 70, 120, 0.55)), url('${img.src}')`;
+            heroElement.style.backgroundImage = `linear-gradient(rgba(0, 70, 120, 0.15), rgba(0, 70, 120, 0.15)), url('${img.src}')`;
             heroElement.querySelector('::before').style.opacity = 0;
         };
     });
 
-    // ========================
     // 60个完整的客户故事数据（含姓名、地区、精确到分钟的时间）
-    // ========================
     const clientStories = [
         {
             name: "Emma Thompson",
@@ -907,9 +909,7 @@
         }
     ];
 
-    // ========================
     // 初始化6个随机展示的案例 + 6秒轮播逻辑
-    // ========================
     const caseGrid = document.getElementById('caseGrid');
     let displayedIndices = []; // 记录已展示的索引
     let currentCases = [];     // 当前显示的6个案例
@@ -987,9 +987,7 @@
     initCases();
     setInterval(rotateCase, 6000); // 每6秒替换一个
 
-    // ========================
     // 原有评论和头像滚动逻辑
-    // ========================
     const reviews = [
         {"city":"London","star":5,"text":"Very professional and discreet service. I felt respected and supported from start to finish."},
         {"city":"Manchester","star":5,"text":"Extremely happy with the experience. Full privacy and very caring support."},
